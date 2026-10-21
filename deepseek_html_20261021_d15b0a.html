@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Present Simple — Spelling Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a12;
+    --glass:rgba(255,255,255,.045);
+    --stroke:rgba(255,255,255,.09);
+    --stroke2:rgba(255,255,255,.16);
+    --ink:#f4f5fb;
+    --muted:#8b90a8;
+    --violet:#8b5cf6;
+    --cyan:#22d3ee;
+    --pink:#f472b6;
+    --ok:#34d399;
+    --err:#fb7185;
+    --radius:22px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Manrope',system-ui,-apple-system,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    min-height:100vh;
+    padding:40px 18px 90px;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(700px 500px at 12% -5%, rgba(139,92,246,.28), transparent 60%),
+      radial-gradient(600px 500px at 88% 0%, rgba(34,211,238,.18), transparent 55%),
+      radial-gradient(700px 600px at 50% 110%, rgba(244,114,182,.16), transparent 60%),
+      linear-gradient(180deg,#0a0a12,#0d0d18 50%,#0a0a12);
+  }
+  body::after{
+    content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px;
+    mask-image:radial-gradient(circle at 50% 30%, black, transparent 80%);
+    -webkit-mask-image:radial-gradient(circle at 50% 30%, black, transparent 80%);
+  }
+
+  header{max-width:1120px;margin:0 auto 30px;text-align:center;}
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--cyan);background:rgba(34,211,238,.08);
+    border:1px solid rgba(34,211,238,.25);
+    padding:7px 14px;border-radius:999px;margin-bottom:18px;
+  }
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);
+    box-shadow:0 0 10px var(--cyan);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(28px,5vw,48px);font-weight:700;letter-spacing:-.03em;
+    line-height:1.05;margin-bottom:14px;
+  }
+  h1 .grad{
+    background:linear-gradient(100deg,var(--violet) 0%,var(--cyan) 45%,var(--pink) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{color:var(--muted);font-size:15px;max-width:520px;margin:0 auto;line-height:1.6;}
+
+  /* ===== TABS ===== */
+  .tabs{
+    max-width:1120px;margin:0 auto 20px;
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+  }
+  .tab{
+    font-family:inherit;font-size:13px;font-weight:800;
+    padding:11px 18px;border-radius:12px;cursor:pointer;
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--stroke);
+    color:var(--muted);
+    transition:.2s;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .tab:hover{background:rgba(255,255,255,.09);color:var(--ink);transform:translateY(-1px);}
+  .tab .tnum{
+    font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;
+    width:20px;height:20px;border-radius:6px;
+    display:grid;place-items:center;
+    background:rgba(255,255,255,.08);color:var(--muted);
+    transition:.2s;
+  }
+  .tab.active{
+    color:#fff;
+    background:linear-gradient(135deg,rgba(139,92,246,.35),rgba(34,211,238,.2));
+    border-color:rgba(139,92,246,.6);
+    box-shadow:0 8px 24px rgba(139,92,246,.28);
+  }
+  .tab.active .tnum{
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    color:#fff;
+  }
+
+  .wrap{max-width:1120px;margin:0 auto;display:grid;gap:20px;}
+  .card{
+    position:relative;
+    background:linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--stroke);
+    border-radius:var(--radius);
+    padding:26px;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    display:flex;flex-direction:column;
+  }
+  .card-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px;}
+  .num{
+    flex:none;width:38px;height:38px;border-radius:12px;
+    display:grid;place-items:center;
+    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    box-shadow:0 8px 22px rgba(139,92,246,.4);
+  }
+  .card h2{font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.25;}
+  .task{font-size:13px;color:var(--muted);line-height:1.55;margin:4px 0 20px;}
+
+  /* panel switch */
+  .panel{display:none;}
+  .panel.active{display:block;animation:fadeIn .35s cubic-bezier(.2,.7,.3,1);}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  input[type=text]{
+    font-family:inherit;font-size:15px;font-weight:600;color:var(--ink);
+    padding:11px 14px;width:100%;
+    background:rgba(255,255,255,.05);
+    border:1.5px solid var(--stroke2);
+    border-radius:12px;outline:none;
+    transition:.2s;
+  }
+  input[type=text]::placeholder{color:rgba(139,144,168,.7);font-weight:500;}
+  input[type=text]:focus{
+    border-color:var(--violet);
+    background:rgba(139,92,246,.09);
+    box-shadow:0 0 0 4px rgba(139,92,246,.16);
+  }
+  input.ok{border-color:var(--ok)!important;background:rgba(52,211,153,.1)!important;
+    box-shadow:0 0 0 4px rgba(52,211,153,.14)!important;}
+  input.err{border-color:var(--err)!important;background:rgba(251,113,133,.1)!important;
+    box-shadow:0 0 0 4px rgba(251,113,133,.14)!important;animation:shake .35s;}
+  @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+  button{
+    font-family:inherit;font-size:13px;font-weight:800;letter-spacing:.01em;
+    border:none;border-radius:12px;padding:12px 20px;cursor:pointer;
+    color:#fff;background:linear-gradient(135deg,var(--violet),#a78bfa);
+    box-shadow:0 10px 26px rgba(139,92,246,.36);
+    transition:transform .16s, box-shadow .2s, filter .2s;
+  }
+  button:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(139,92,246,.46);filter:brightness(1.06);}
+  button:active{transform:translateY(0) scale(.98);}
+  button.ghost{
+    background:rgba(255,255,255,.05);color:var(--ink);
+    border:1px solid var(--stroke2);box-shadow:none;
+  }
+  button.ghost:hover{background:rgba(255,255,255,.1);box-shadow:none;}
+  button.cyan{background:linear-gradient(135deg,#06b6d4,var(--cyan));
+    box-shadow:0 10px 26px rgba(34,211,238,.34);color:#04141a;}
+  button.cyan:hover{box-shadow:0 14px 32px rgba(34,211,238,.44);}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:18px;}
+
+  .feedback{font-size:13px;font-weight:700;margin-top:12px;min-height:18px;line-height:1.5;}
+  .ok-text{color:var(--ok);} .err-text{color:var(--err);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr;}}
+  .item{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--stroke);
+    border-radius:14px;padding:9px 11px;
+    transition:border-color .2s, background .2s;
+  }
+  .item:focus-within{border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.06);}
+  .item .v{font-weight:800;font-size:14px;color:var(--cyan);white-space:nowrap;}
+  .item .arrow{color:var(--muted);font-size:12px;}
+  .item input{padding:8px 10px;font-size:14px;border-radius:10px;}
+
+  .row{display:flex;align-items:center;gap:12px;margin:9px 0;flex-wrap:wrap;font-size:15px;}
+  .verb{font-weight:800;color:var(--cyan);min-width:104px;font-size:14px;}
+  .arrowm{color:var(--muted);}
+  .choice{
+    display:inline-block;cursor:pointer;user-select:none;
+    font-size:13.5px;font-weight:700;
+    padding:7px 14px;border-radius:10px;
+    background:rgba(255,255,255,.045);
+    border:1.5px solid var(--stroke);
+    color:var(--ink);
+    transition:.18s;
+  }
+  .choice:hover{background:rgba(255,255,255,.1);border-color:var(--stroke2);transform:translateY(-1px);}
+  .choice.right{
+    background:rgba(52,211,153,.16);border-color:var(--ok);color:var(--ok);
+    box-shadow:0 0 18px rgba(52,211,153,.22);
+  }
+  .choice.wrong{
+    background:rgba(251,113,133,.16);border-color:var(--err);color:var(--err);
+    animation:shake .35s;
+  }
+
+  .sent{
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--stroke);
+    border-radius:14px;padding:14px 16px;margin-bottom:10px;
+    transition:border-color .2s;
+  }
+  .sent:focus-within,.sent.answered{border-color:rgba(34,211,238,.35);}
+  .sentence{font-size:15px;line-height:1.7;color:#e6e8f2;margin-bottom:9px;}
+  .score{font-size:12.5px;color:var(--muted);font-weight:700;text-align:center;margin-top:14px;
+    letter-spacing:.02em;}
+
+  #ex4{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px;}
+  .fc{perspective:1200px;height:168px;cursor:pointer;}
+  .fc-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);}
+  .fc.flipped .fc-in{transform:rotateY(180deg);}
+  .face{
+    position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    border-radius:18px;padding:14px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;overflow:hidden;
+  }
+  .front{
+    background:linear-gradient(150deg,rgba(139,92,246,.22),rgba(34,211,238,.1));
+    border:1px solid rgba(139,92,246,.4);
+    box-shadow:0 12px 30px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .front::before{
+    content:'';position:absolute;top:-40%;left:-40%;width:180%;height:180%;
+    background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.12), transparent 55%);
+    pointer-events:none;
+  }
+  .front .base{
+    font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;
+    letter-spacing:-.02em;color:#fff;margin-bottom:10px;
+  }
+  .front small{font-size:10.5px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);margin-top:7px;}
+  .fc input{
+    margin:0;padding:8px 10px;font-size:13px;text-align:center;border-radius:10px;
+    background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.18);
+  }
+  .fc input::placeholder{color:rgba(139,144,168,.8);}
+  .fc input:focus{background:rgba(0,0,0,.5);border-color:var(--cyan);
+    box-shadow:0 0 0 4px rgba(34,211,238,.16);}
+  .back{
+    background:linear-gradient(150deg,rgba(244,114,182,.28),rgba(139,92,246,.18));
+    border:1px solid rgba(244,114,182,.45);
+    transform:rotateY(180deg);
+    box-shadow:0 12px 30px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .back .ans{
+    font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;
+    color:#fff;letter-spacing:-.02em;
+    text-shadow:0 0 24px rgba(244,114,182,.6);
+  }
+  .back small{font-size:10.5px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:rgba(255,255,255,.7);margin-top:8px;}
+  .fc-ok{font-size:11px;font-weight:800;margin-top:8px;color:#fff;}
+
+  .rule{font-size:14px;line-height:1.95;color:#d8dbe8;}
+  .rule b{color:#fff;}
+  .rule .hi{color:var(--cyan);font-weight:800;}
+  .rule .plus{color:var(--pink);font-weight:800;}
+  .rule-sep{height:1px;background:var(--stroke);margin:12px 0;}
+
+  .progress{height:10px;background:rgba(255,255,255,.06);border-radius:999px;
+    overflow:hidden;margin-top:16px;border:1px solid var(--stroke);}
+  .bar{height:100%;width:0;border-radius:999px;
+    background:linear-gradient(90deg,var(--violet),var(--cyan),var(--pink));
+    background-size:200% 100%;
+    transition:width .5s cubic-bezier(.4,.2,.2,1);
+    animation:shift 4s linear infinite;
+    box-shadow:0 0 20px rgba(139,92,246,.5);}
+  @keyframes shift{to{background-position:200% 0;}}
+  .big{
+    text-align:center;font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(48px,8vw,72px);font-weight:700;letter-spacing:-.04em;
+    line-height:1;margin:6px 0 4px;
+    background:linear-gradient(100deg,var(--violet),var(--cyan) 50%,var(--pink));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .tip{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;}
+
+  ::selection{background:rgba(139,92,246,.4);}
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:#0a0a12;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:9px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker"><span class="dot"></span> Spelling Lab</div>
+  <h1>Present Simple<br><span class="grad">Spelling Trainer</span></h1>
+  <p class="sub">Master the -s / -es / -ies endings with he / she / it. Interactive practice.</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="0"><span class="tnum">01</span> Rule</button>
+  <button class="tab" data-tab="1"><span class="tnum">02</span> Write the form</button>
+  <button class="tab" data-tab="2"><span class="tnum">03</span> Choose</button>
+  <button class="tab" data-tab="3"><span class="tnum">04</span> Flash cards</button>
+  <button class="tab" data-tab="4"><span class="tnum">05</span> Sentences</button>
+  <button class="tab" data-tab="5"><span class="tnum">06</span> Fix mistakes</button>
+  <button class="tab" data-tab="6"><span class="tnum">07</span> Result</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- 1. RULE -->
+  <section class="panel active" data-panel="0">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">01</div>
+        <div><h2>Rule card</h2></div>
+      </div>
+      <div class="task">Read it, remember it, then practice.</div>
+      <div class="rule">
+        <b>he / she / it</b> → verb + <span class="hi">-s</span><br>
+        play → play<b>s</b> &nbsp; read → read<b>s</b>
+        <div class="rule-sep"></div>
+        endings <b>-s, -ss, -sh, -ch, -x, -o</b> → <span class="plus">+ es</span><br>
+        watch → watch<b>es</b> &nbsp; go → go<b>es</b> &nbsp; do → do<b>es</b>
+        <div class="rule-sep"></div>
+        consonant + <b>y</b> → <span class="plus">-y → -ies</span><br>
+        study → stud<b>ies</b> &nbsp; fly → fl<b>ies</b>
+        <div class="rule-sep"></div>
+        vowel + <b>y</b> → just <b>+ s</b><br>
+        play → play<b>s</b> &nbsp; buy → buy<b>s</b>
+      </div>
+      <div class="btnrow">
+        <button class="ghost" onclick="speak('He plays. She watches. It flies. He goes.')">🔊 Listen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. WRITE THE FORM -->
+  <section class="panel" data-panel="1">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">02</div>
+        <div><h2>Write the he/she/it form</h2></div>
+      </div>
+      <div class="task">Type the correct spelling. 20 verbs.</div>
+      <div id="ex2" class="grid2"></div>
+      <div class="btnrow">
+        <button onclick="checkEx2()">Check</button>
+        <button class="ghost" onclick="resetEx2()">Reset</button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </section>
+
+  <!-- 3. CHOOSE -->
+  <section class="panel" data-panel="2">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">03</div>
+        <div><h2>Choose the correct spelling</h2></div>
+      </div>
+      <div class="task">Click the right form. 15 verbs.</div>
+      <div id="ex3"></div>
+      <div class="score" id="score3">Correct: 0 / 0</div>
+    </div>
+  </section>
+
+  <!-- 4. FLASH CARDS -->
+  <section class="panel" data-panel="3">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">04</div>
+        <div><h2>Flash cards — type, then flip</h2></div>
+      </div>
+      <div class="task">Type the he/she/it form in the box. Then click the card to flip it and check.</div>
+      <div id="ex4"></div>
+      <div class="btnrow">
+        <button class="ghost" onclick="shuffleEx4()">🔀 Shuffle</button>
+        <button class="ghost" onclick="resetEx4()">Reset</button>
+        <button class="cyan" onclick="checkAllEx4()">Check all</button>
+      </div>
+      <div class="feedback" id="fb4"></div>
+    </div>
+  </section>
+
+  <!-- 5. SENTENCES -->
+  <section class="panel" data-panel="4">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">05</div>
+        <div><h2>Complete the sentences</h2></div>
+      </div>
+      <div class="task">Choose the correct verb form. 16 sentences.</div>
+      <div id="ex5"></div>
+      <div class="score" id="score5">Correct: 0 / 0</div>
+    </div>
+  </section>
+
+  <!-- 6. FIX MISTAKES -->
+  <section class="panel" data-panel="5">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">06</div>
+        <div><h2>Find and fix the spelling mistake</h2></div>
+      </div>
+      <div class="task">Each sentence has one wrong verb. Write the correct word. 15 sentences.</div>
+      <div id="ex6"></div>
+      <div class="btnrow">
+        <button onclick="checkEx6()">Check</button>
+        <button class="ghost" onclick="resetEx6()">Reset</button>
+      </div>
+      <div class="feedback" id="fb6"></div>
+    </div>
+  </section>
+
+  <!-- 7. TOTAL -->
+  <section class="panel" data-panel="6">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">07</div>
+        <div><h2>Your result</h2></div>
+      </div>
+      <div class="big" id="total">0%</div>
+      <div class="progress"><div class="bar" id="totalBar"></div></div>
+      <div class="score" id="totalText">Complete the exercises — your score will appear here.</div>
+      <div class="btnrow" style="justify-content:center">
+        <button class="cyan" onclick="location.reload()">🔄 Start again</button>
+      </div>
+      <div class="tip">Tip: say the word out loud while you type it — it helps you remember the spelling!</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============ TABS ============ */
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+tabs.forEach(t => {
+  t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelector(`.panel[data-panel="${t.dataset.tab}"]`).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ============ COMMON ============ */
+const state = {total:0, correct:0};
+function updateTotal(){
+  const pct = state.total ? Math.round(state.correct/state.total*100) : 0;
+  document.getElementById('total').textContent = pct + '%';
+  document.getElementById('totalBar').style.width = pct + '%';
+  document.getElementById('totalText').textContent =
+    `Correct answers: ${state.correct} of ${state.total}`;
+}
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.85;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+
+/* ============ 2. WRITE THE FORM ============ */
+const ex2data = [
+  ['watch','watches'], ['play','plays'], ['study','studies'], ['go','goes'],
+  ['fly','flies'], ['read','reads'], ['do','does'], ['wash','washes'],
+  ['buy','buys'], ['finish','finishes'], ['have','has'], ['like','likes'],
+  ['live','lives'], ['teach','teaches'], ['carry','carries'], ['say','says'],
+  ['cry','cries'], ['fix','fixes'], ['enjoy','enjoys'], ['dress','dresses']
+];
+function buildEx2(){
+  const box = document.getElementById('ex2');
+  box.innerHTML = '';
+  ex2data.forEach(([base],i)=>{
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = `<span class="v">${base}</span><span class="arrow">→</span>
+      <input type="text" id="e2_${i}" autocomplete="off" spellcheck="false" placeholder="he/she/it">`;
+    box.appendChild(d);
+  });
+}
+function checkEx2(){
+  let ok=0;
+  ex2data.forEach(([,ans],i)=>{
+    const inp = document.getElementById('e2_'+i);
+    inp.classList.remove('ok','err');
+    if(norm(inp.value) === ans){ inp.classList.add('ok'); ok++; }
+    else inp.classList.add('err');
+  });
+  const fb = document.getElementById('fb2');
+  fb.className = 'feedback ' + (ok===ex2data.length?'ok-text':'err-text');
+  fb.textContent = ok===ex2data.length
+    ? `Perfect! ${ok}/${ex2data.length} ✅`
+    : `Correct: ${ok} of ${ex2data.length}. Check the red boxes. Hint: -s, -es or -ies?`;
+  state.total += ex2data.length; state.correct += ok; updateTotal();
+}
+function resetEx2(){
+  ex2data.forEach((_,i)=>{
+    const inp = document.getElementById('e2_'+i);
+    inp.value=''; inp.classList.remove('ok','err');
+  });
+  document.getElementById('fb2').textContent='';
+}
+
+/* ============ 3. CHOOSE ============ */
+const ex3data = [
+  {q:'he (watch)', opts:['watchs','watches','watchies'], ans:1},
+  {q:'she (study)', opts:['studys','studyes','studies'], ans:2},
+  {q:'it (fly)', opts:['flys','flies','flyes'], ans:1},
+  {q:'he (go)', opts:['gos','goes','goies'], ans:1},
+  {q:'she (play)', opts:['plays','playes','plaies'], ans:0},
+  {q:'it (do)', opts:['dos','does','doies'], ans:1},
+  {q:'he (wash)', opts:['washs','washes','washies'], ans:1},
+  {q:'she (buy)', opts:['buys','buyes','buies'], ans:0},
+  {q:'it (finish)', opts:['finishs','finishes','finishies'], ans:1},
+  {q:'he (read)', opts:['reades','readies','reads'], ans:2},
+  {q:'she (carry)', opts:['carrys','carries','carryes'], ans:1},
+  {q:'he (teach)', opts:['teachs','teaches','teachies'], ans:1},
+  {q:'it (fix)', opts:['fixs','fixes','fixies'], ans:1},
+  {q:'he (have)', opts:['haves','has','havies'], ans:1},
+  {q:'she (cry)', opts:['crys','cries','cryes'], ans:1}
+];
+let ex3done=0, ex3ok=0;
+function buildEx3(){
+  const box = document.getElementById('ex3');
+  box.innerHTML='';
+  ex3data.forEach(d=>{
+    const div = document.createElement('div');
+    div.className='row';
+    div.innerHTML = `<span class="verb">${d.q}</span><span class="arrowm">→</span>`;
+    d.opts.forEach((o,j)=>{
+      const c = document.createElement('span');
+      c.className='choice'; c.textContent=o;
+      c.onclick = ()=>{
+        if(div.dataset.done) return;
+        div.dataset.done='1';
+        if(j===d.ans){ c.classList.add('right'); ex3ok++; state.correct++; }
+        else{
+          c.classList.add('wrong');
+          div.querySelectorAll('.choice')[d.ans].classList.add('right');
+        }
+        ex3done++; state.total++;
+        document.getElementById('score3').textContent = `Correct: ${ex3ok} / ${ex3done}`;
+        updateTotal();
+      };
+      div.appendChild(c);
+    });
+    box.appendChild(div);
+  });
+}
+
+/* ============ 4. FLASH CARDS ============ */
+let ex4data = [
+  ['watch','watches'], ['study','studies'], ['play','plays'], ['go','goes'],
+  ['fly','flies'], ['do','does'], ['wash','washes'], ['read','reads'],
+  ['buy','buys'], ['finish','finishes'], ['have','has'], ['like','likes'],
+  ['live','lives'], ['teach','teaches'], ['carry','carries'], ['cry','cries'],
+  ['fix','fixes'], ['enjoy','enjoys'], ['dress','dresses'], ['say','says']
+];
+function buildEx4(){
+  const box = document.getElementById('ex4');
+  box.innerHTML='';
+  ex4data.forEach(([front,back],i)=>{
+    const card = document.createElement('div');
+    card.className='fc';
+    card.innerHTML = `
+      <div class="fc-in">
+        <div class="face front">
+          <div class="base">${front}</div>
+          <input type="text" id="fc_${i}" placeholder="he/she/it…" autocomplete="off" spellcheck="false">
+          <small>type, then flip →</small>
+        </div>
+        <div class="face back">
+          <div class="ans">${back}</div>
+          <div class="fc-ok" id="fcok_${i}"></div>
+          <small>click to flip back</small>
+        </div>
+      </div>`;
+    card.addEventListener('click', (e)=>{
+      if(e.target.tagName === 'INPUT') return;
+      card.classList.toggle('flipped');
+      const inp = card.querySelector('input');
+      const res = document.getElementById('fcok_'+i);
+      if(card.classList.contains('flipped')){
+        if(norm(inp.value) === back){
+          res.textContent = '✅ Correct!';
+        } else if(inp.value.trim() === ''){
+          res.textContent = '✏️ Type it first next time';
+        } else {
+          res.textContent = '❌ You wrote: ' + inp.value;
+        }
+        speak(back);
+      }
+    });
+    box.appendChild(card);
+  });
+  document.getElementById('fb4').textContent='';
+}
+function resetEx4(){ buildEx4(); }
+function shuffleEx4(){
+  for(let i=ex4data.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [ex4data[i],ex4data[j]]=[ex4data[j],ex4data[i]];
+  }
+  buildEx4();
+}
+function checkAllEx4(){
+  let ok=0;
+  ex4data.forEach(([,back],i)=>{
+    const inp = document.getElementById('fc_'+i);
+    if(norm(inp.value) === back){ ok++; inp.style.borderColor='#34d399'; }
+    else inp.style.borderColor='#fb7185';
+  });
+  const fb = document.getElementById('fb4');
+  fb.className='feedback ' + (ok===ex4data.length?'ok-text':'err-text');
+  fb.textContent = ok===ex4data.length
+    ? `All correct! ${ok}/${ex4data.length} ✅`
+    : `Correct: ${ok} of ${ex4data.length}. Flip the cards to check.`;
+  state.total += ex4data.length; state.correct += ok; updateTotal();
+}
+
+/* ============ 5. SENTENCES ============ */
+const ex5data = [
+  {s:'My sister ___ TV every evening.', opts:['watch','watches','watchies'], ans:1},
+  {s:'Tom ___ to school by bus.', opts:['go','goes','gos'], ans:1},
+  {s:'The bird ___ in the sky.', opts:['fly','flys','flies'], ans:2},
+  {s:'Ann ___ her homework after dinner.', opts:['do','does','dos'], ans:1},
+  {s:'He ___ football on Sundays.', opts:['play','plays','playes'], ans:1},
+  {s:'She ___ English every day.', opts:['study','studys','studies'], ans:2},
+  {s:'My mum ___ the dishes.', opts:['wash','washes','washs'], ans:1},
+  {s:'It ___ a lot in autumn.', opts:['rain','rains','raines'], ans:1},
+  {s:'Jack ___ a new bike.', opts:['have','has','haves'], ans:1},
+  {s:'My teacher ___ us English.', opts:['teach','teachs','teaches'], ans:2},
+  {s:'She ___ her little brother.', opts:['carry','carrys','carries'], ans:2},
+  {s:'The baby ___ at night.', opts:['cry','crys','cries'], ans:2},
+  {s:'He ___ his car every week.', opts:['fix','fixs','fixes'], ans:2},
+  {s:'She ___ to music after school.', opts:['listen','listens','listenes'], ans:1},
+  {s:'My dad ___ dinner on Fridays.', opts:['cook','cooks','cookes'], ans:1},
+  {s:'It ___ very fast.', opts:['run','runs','runes'], ans:1}
+];
+let ex5done=0, ex5ok=0;
+function buildEx5(){
+  const box = document.getElementById('ex5');
+  box.innerHTML='';
+  ex5data.forEach(d=>{
+    const div = document.createElement('div');
+    div.className='sent';
+    div.innerHTML = `<div class="sentence">${d.s}</div>`;
+    const wrap = document.createElement('div');
+    wrap.style.display='flex'; wrap.style.flexWrap='wrap'; wrap.style.gap='8px';
+    d.opts.forEach((o,j)=>{
+      const c = document.createElement('span');
+      c.className='choice'; c.textContent=o;
+      c.onclick = ()=>{
+        if(div.dataset.done) return;
+        div.dataset.done='1';
+        div.classList.add('answered');
+        if(j===d.ans){ c.classList.add('right'); ex5ok++; state.correct++; speak(d.s.replace('___',o)); }
+        else{
+          c.classList.add('wrong');
+          wrap.querySelectorAll('.choice')[d.ans].classList.add('right');
+        }
+        ex5done++; state.total++;
+        document.getElementById('score5').textContent = `Correct: ${ex5ok} / ${ex5done}`;
+        updateTotal();
+      };
+      wrap.appendChild(c);
+    });
+    div.appendChild(wrap);
+    box.appendChild(div);
+  });
+}
+
+/* ============ 6. FIX MISTAKES ============ */
+const ex6data = [
+  ['He watchs TV every day.','watches'],
+  ['She studys English at school.','studies'],
+  ['It flys high in the sky.','flies'],
+  ['Tom gos to school by bus.','goes'],
+  ['My dad doies sports.','does'],
+  ['Ann playes the piano.','plays'],
+  ['She washs her hands.','washes'],
+  ['He finishs his homework.','finishes'],
+  ['My mum carrys the bags.','carries'],
+  ['The baby crys a lot.','cries'],
+  ['He fixs his bike.','fixes'],
+  ['She teachs Maths.','teaches'],
+  ['It rains in autumn.','rains'],
+  ['My brother enjoyes music.','enjoys'],
+  ['She dreeses quickly.','dresses']
+];
+function buildEx6(){
+  const box = document.getElementById('ex6');
+  box.innerHTML='';
+  ex6data.forEach(([s],i)=>{
+    const d = document.createElement('div');
+    d.className='item';
+    d.style.margin='9px 0';
+    d.style.padding='13px 15px';
+    d.innerHTML = `<div style="flex:1"><span class="sentence" style="margin:0">${s}</span></div>
+      <input type="text" id="e6_${i}" placeholder="correct word" autocomplete="off" spellcheck="false" style="width:170px;flex:none">`;
+    box.appendChild(d);
+  });
+}
+function checkEx6(){
+  let ok=0;
+  ex6data.forEach(([,ans],i)=>{
+    const inp = document.getElementById('e6_'+i);
+    inp.classList.remove('ok','err');
+    if(norm(inp.value) === ans){ inp.classList.add('ok'); ok++; }
+    else inp.classList.add('err');
+  });
+  const fb = document.getElementById('fb6');
+  fb.className='feedback ' + (ok===ex6data.length?'ok-text':'err-text');
+  fb.textContent = ok===ex6data.length
+    ? `All fixed! ${ok}/${ex6data.length} ✅`
+    : `Correct: ${ok} of ${ex6data.length}. Hint: -s / -es / -ies.`;
+  state.total += ex6data.length; state.correct += ok; updateTotal();
+}
+function resetEx6(){
+  ex6data.forEach((_,i)=>{
+    const inp = document.getElementById('e6_'+i);
+    inp.value=''; inp.classList.remove('ok','err');
+  });
+  document.getElementById('fb6').textContent='';
+}
+
+/* ============ START ============ */
+buildEx2(); buildEx3(); buildEx4(); buildEx5(); buildEx6();
+updateTotal();
+</script>
+</body>
+</html>
